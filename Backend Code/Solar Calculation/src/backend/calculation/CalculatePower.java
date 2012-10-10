@@ -15,6 +15,8 @@ public class CalculatePower {
 	private static int NW = 7;
 	private static int FLAT = 8;
 	
+	private static double HOURS_OF_SUNLIGHT = 4.5;
+	
 	private static Double EFFICIENCY_LOSS_PER_YEAR = 0.007;
 	private static Double EFFICIENCY_LOSS_FROM_INVERTER = 0.96;
 	
@@ -22,6 +24,7 @@ public class CalculatePower {
 	//Efficiency Loss from Roof, Age, Inverter) *  
 	//Average Hours of Sunlight
 	
+	//Daily power generation
 	public static double calculate(House house){
 		
 		Double roofPower[] = new Double[house.numberOfRoofs()];
@@ -29,7 +32,7 @@ public class CalculatePower {
 		
 		for (int i = 0; i < house.numberOfRoofs(); i++){
 			
-			roofPower[i] = (house.getRoof(i).getSizeOfCurrentPanels() * roofEfficiency(house.getRoof(i))) * 10 ;
+			roofPower[i] = (house.getRoof(i).getSizeOfCurrentPanels() * roofEfficiency(house.getRoof(i))) * HOURS_OF_SUNLIGHT;
 			totalPower = totalPower + roofPower[i];
 		}
 		

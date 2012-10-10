@@ -14,7 +14,6 @@ public class Roof {
 	private int ageOfCurrentPanels;
 	private Double sizeOfCurrentPanels;
 	private int typeOfCurrentPanels;
-	private List<Panel> Panels;
 
 	public Roof(int sectionID, String name, Double length, Double width, Double angle, int direction, 
 			int numberOfCurrentPanels, int ageOfCurrentPanels, Double sizeOfCurrentPanels, int typeOfCurrentPanels) {
@@ -31,20 +30,7 @@ public class Roof {
 
 	}
 	
-	public void addPanels(Panel panelSection){
-		
-		Panels.add(panelSection);
-	}
 	
-	public Panel getPanel(int index){
-		
-		return Panels.get(index);
-	}
-	
-	public int numberOfPanels(){
-		
-		return Panels.size();
-	}
 
 	public Double getLength() {
 		return length;

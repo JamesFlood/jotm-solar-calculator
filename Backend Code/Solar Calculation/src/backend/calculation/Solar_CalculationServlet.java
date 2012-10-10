@@ -41,22 +41,16 @@ public class Solar_CalculationServlet extends HttpServlet {
 		
 		//Setting the usagePerQuarter array
 		house.setUsage(usage);
-		
-		System.out.println("HELLO");
-		
+			
 		//Preparing to add the roof sections
 		JsonArray jsonRoof = jsonHouse.getAsJsonArray("roofSection");
 		
 		Roof roofSection[] = new Roof[jsonRoof.size()];
 		
-		System.out.println("hi");
-		
 		//Iterate through each roof section, creating its object and adding it to the array of roofs
 		for (int i = 0; i < jsonRoof.size(); i++){
 			
 			JsonObject currentRoof = (JsonObject) jsonRoof.get(i);
-			
-			System.out.println(i);
 			
 			roofSection[i] = new Roof(i, currentRoof.get("sectionName").getAsString(), 
 					currentRoof.get("length").getAsDouble(), currentRoof.get("width").getAsDouble(), currentRoof.get("angle").getAsDouble(),
@@ -75,8 +69,8 @@ public class Solar_CalculationServlet extends HttpServlet {
 		JsonArray jsonScenarios = json.getAsJsonArray("scenarios");
 		Scenario scenarios[] = new Scenario[jsonScenarios.size()];
 		
-		JsonObject jsonResponse = new JsonObject();
-		JsonArray results = new JsonArray();
+		//JsonObject jsonResponse = new JsonObject();
+		//JsonArray results = new JsonArray();
 		
 		for (int i = 0; i < jsonScenarios.size(); i++){
 			
@@ -98,7 +92,27 @@ public class Solar_CalculationServlet extends HttpServlet {
 			result.addProperty("quotedPrice", 0);
 			
 			double powerResult = CalculatePower.calculate(house);
-			double powerQuart = powerResult / 4;
+			double powerYearly = powerResult * 365;
+			double powerQuart = powerYearly / 4;
+			//double 
+			
+			
+			//Find out how long till profit break even
+			double accumulatedProfit = 0;
+			int months = 0;
+			int years = 0;
+			while (accumulatedProfit <= scenarios[i].getQuotedPrice()){
+				
+				months = months + 3;
+				accumulatedProfit = (accumulatedProfit + (powerQuart * house.getTariff()));				
+			}
+			
+			while (months >= 12) {
+				
+				years++;
+				months = months - 12;
+			}
+			
 			
 			actualJson = actualJson + "{" +
 			      "\"name\": \"" + scenarios[i].getName() + "\"," +
@@ -129,17 +143,17 @@ public class Solar_CalculationServlet extends HttpServlet {
 			          "\"excessPowerGenerated\": " + (powerQuart - house.getUsage(3)) + "" +
 			        "}" +
 			      "]," +
-			      "\"powerGeneratedPerYear\": " + powerResult + "," +
+			      "\"powerGeneratedPerYear\": " + powerYearly + "," +
 			      "\"powerUsedPerYear\": " + house.getUsage(4) + "," +
 			      "\"powerBoughtPerYear\": 0," +
 			      "\"excessPowerGeneratedPerYear\": " + ((powerQuart - house.getUsage(0)) + (powerQuart - house.getUsage(1))
 			      + (powerQuart - house.getUsage(2)) + (powerQuart - house.getUsage(3))) + "," +
 			      "\"breakEvenTime\": {" +
-			        "\"years\": 0," +
-			        "\"months\": 0" +
+			        "\"years\": " + years + "," +
+			        "\"months\": " + months + "" +
 			      "}," +
-			      "\"moneySavedAfter1Year\": " + (powerResult * house.getTariff()) + "," +
-			      "\"moneySavedAfter5Years\": " + ((powerResult * house.getTariff()) * 5) + "," +
+			      "\"moneySavedAfter1Year\": " + (powerYearly * house.getTariff()) + "," +
+			      "\"moneySavedAfter5Years\": " + ((powerYearly * house.getTariff()) * 5) + "," +
 			      "\"graphURL\": \"http://www.graph.com\"" +
 			    "}";
 			
@@ -151,12 +165,6 @@ public class Solar_CalculationServlet extends HttpServlet {
 		}//End Scenario For Loop
 		
 		actualJson += "],\"status\": \"valid\"}";
-		
-		
-		
-		
-		
-		
 		
 		double power = CalculatePower.calculate(house);
 		
