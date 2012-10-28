@@ -36,8 +36,12 @@ public class Scenario {
 	public void setSizeOfNewPanels(int sizeOfNewPanels) {
 		this.sizeOfNewPanels = sizeOfNewPanels;
 	}
-	public int[] getNumberOfPanelsPerSection() {
-		return numberOfPanelsPerSection;
+	public int numberOfNewPanels() {
+		return numberOfPanelsPerSection.length;
+	}
+	
+	public int getNumberOfPanelsPerSection(int i) {
+		return numberOfPanelsPerSection[i];
 	}
 	public void setNumberOfPanelsPerSection(int[] numberOfPanelsPerSection) {
 		this.numberOfPanelsPerSection = numberOfPanelsPerSection;

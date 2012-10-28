@@ -25,15 +25,20 @@ public class CalculatePower {
 	//Average Hours of Sunlight
 	
 	//Daily power generation
-	public static double calculate(House house){
+	public static double calculate(House house, Scenario scenario){
 		
 		Double roofPower[] = new Double[house.numberOfRoofs()];
 		Double totalPower = 0.0;
 		
 		for (int i = 0; i < house.numberOfRoofs(); i++){
 			
-			roofPower[i] = (house.getRoof(i).getSizeOfCurrentPanels() * roofEfficiency(house.getRoof(i))) * HOURS_OF_SUNLIGHT;
+			roofPower[i] = ((house.getRoof(i).getSizeOfCurrentPanels() * house.getRoof(i).getNumberOfCurrentPanels()) * roofEfficiency(house.getRoof(i))) * HOURS_OF_SUNLIGHT;
 			totalPower = totalPower + roofPower[i];
+		}
+		
+		for (int z=0; z < scenario.numberOfNewPanels(); z++) {
+			
+			totalPower = totalPower + ((scenario.getNumberOfPanelsPerSection(z) * roofEfficiency(house.getRoof(z))) * HOURS_OF_SUNLIGHT);
 		}
 		
 		return totalPower;

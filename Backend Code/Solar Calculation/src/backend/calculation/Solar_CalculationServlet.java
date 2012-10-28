@@ -87,11 +87,11 @@ public class Solar_CalculationServlet extends HttpServlet {
 					jsonScenario.get("sizeOfNewPanels").getAsInt(), numberOfPanelsPerSection, 
 					jsonScenario.get("quotedPrice").getAsDouble());
 			
-			JsonObject result = new JsonObject();
-			result.addProperty("name", scenarios[i].getName());
-			result.addProperty("quotedPrice", 0);
+			//JsonObject result = new JsonObject();
+			//result.addProperty("name", scenarios[i].getName());
+			//result.addProperty("quotedPrice", 0);
 			
-			double powerResult = CalculatePower.calculate(house);
+			double powerResult = CalculatePower.calculate(house, scenarios[i]);
 			double powerYearly = powerResult * 365;
 			double powerQuart = powerYearly / 4;
 			//double 
@@ -113,6 +113,9 @@ public class Solar_CalculationServlet extends HttpServlet {
 				months = months - 12;
 			}
 			
+			String graphURL = "https://chart.googleapis.com/chart?chs=600x225&cht=p3&chco=3072F3&chdl=Solar|Grid&chtt=Power+Usage&chd=t:";
+			graphURL += powerQuart + "," + powerBought(powerQuart) + "&chl=" + (int)powerQuart + "+kw|" + (int)powerBought(powerQuart) + "+kw";
+			graphURL += "&chds=0," + (powerQuart + powerBought(powerQuart));
 			
 			actualJson = actualJson + "{" +
 			      "\"name\": \"" + scenarios[i].getName() + "\"," +
@@ -121,40 +124,41 @@ public class Solar_CalculationServlet extends HttpServlet {
 			        "{" +
 			          "\"powerGenerated\": " + powerQuart + "," +
 			          "\"powerUsed\": " + house.getUsage(0) + "," +
-			          "\"powerBought\": 0," +
-			          "\"excessPowerGenerated\": " + (powerQuart - house.getUsage(0)) + "" +
+			          "\"powerBought\": " + powerBought(powerQuart) + "," +
+			          "\"excessPowerGenerated\": " + powerGen((powerQuart - house.getUsage(0))) + "" +
 			        "}," +
 			        "{" +
 			          "\"powerGenerated\": " + powerQuart + "," +
 			          "\"powerUsed\": " + house.getUsage(1) + "," +
-			          "\"powerBought\": 0," +
-			          "\"excessPowerGenerated\": " + (powerQuart - house.getUsage(1)) + "" +
+			          "\"powerBought\": " + powerBought(powerQuart) + "," +
+			          "\"excessPowerGenerated\": " + powerGen((powerQuart - house.getUsage(1))) + "" +
 			        "}," +
 			        "{" +
 			          "\"powerGenerated\": " + powerQuart + "," +
 			          "\"powerUsed\": " + house.getUsage(2) + "," +
-			          "\"powerBought\": 0," +
-			          "\"excessPowerGenerated\": " + (powerQuart - house.getUsage(2)) + "" +
+			          "\"powerBought\": " + powerBought(powerQuart) + "," +
+			          "\"excessPowerGenerated\": " + powerGen((powerQuart - house.getUsage(2))) + "" +
 			        "}," +
 			        "{" +
 			          "\"powerGenerated\": " + powerQuart + "," +
 			          "\"powerUsed\": " + house.getUsage(3) + "," +
-			          "\"powerBought\": 0," +
-			          "\"excessPowerGenerated\": " + (powerQuart - house.getUsage(3)) + "" +
+			          "\"powerBought\": " + powerBought(powerQuart) + "," +
+			          "\"excessPowerGenerated\": " + powerGen((powerQuart - house.getUsage(3))) + "" +
 			        "}" +
 			      "]," +
 			      "\"powerGeneratedPerYear\": " + powerYearly + "," +
 			      "\"powerUsedPerYear\": " + house.getUsage(4) + "," +
-			      "\"powerBoughtPerYear\": 0," +
-			      "\"excessPowerGeneratedPerYear\": " + ((powerQuart - house.getUsage(0)) + (powerQuart - house.getUsage(1))
-			      + (powerQuart - house.getUsage(2)) + (powerQuart - house.getUsage(3))) + "," +
+			      "\"powerBoughtPerYear\": " + powerBought(((powerQuart - house.getUsage(0)) + (powerQuart - house.getUsage(1))
+					      + (powerQuart - house.getUsage(2)) + (powerQuart - house.getUsage(3)))) + "," +
+			      "\"excessPowerGeneratedPerYear\": " + powerGen(((powerQuart - house.getUsage(0)) + (powerQuart - house.getUsage(1))
+			      + (powerQuart - house.getUsage(2)) + (powerQuart - house.getUsage(3)))) + "," +
 			      "\"breakEvenTime\": {" +
 			        "\"years\": " + years + "," +
 			        "\"months\": " + months + "" +
 			      "}," +
 			      "\"moneySavedAfter1Year\": " + (powerYearly * house.getTariff()) + "," +
 			      "\"moneySavedAfter5Years\": " + ((powerYearly * house.getTariff()) * 5) + "," +
-			      "\"graphURL\": \"http://www.graph.com\"" +
+			      "\"graphURL\": " + graphURL +
 			    "}";
 			
 			if ((i + 1) < jsonScenarios.size()){
@@ -166,12 +170,36 @@ public class Solar_CalculationServlet extends HttpServlet {
 		
 		actualJson += "],\"status\": \"valid\"}";
 		
-		double power = CalculatePower.calculate(house);
-		
-		System.out.println(power);
-		
+
 		PrintWriter out = resp.getWriter();
 		out.println(actualJson);
 
+	}
+	
+	//Modifies power generated to correct format
+	public double powerGen(double d){
+		
+		if (d < 0){
+			
+			return 0;
+		}
+		else {
+			
+			return d;
+		}
+	}
+	
+	//Calculates excess power bought
+	public double powerBought(double power){
+		
+		if (power < 0){
+			
+			return -(power);
+		}
+		else{
+			
+			return 0;
+		}
+		
 	}
 }
